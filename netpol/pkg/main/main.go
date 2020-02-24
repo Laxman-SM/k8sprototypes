@@ -37,6 +37,7 @@ func init() {
 }
 
 func bootstrap(k8s *Kubernetes) {
+	k8s.CleanNetworkPolicies([]string{"x","y","z"})
 	//p81 := 81
 	for _, ns := range namespaces {
 		k8s.CreateOrUpdateNamespace(ns, map[string]string{"ns": ns})
@@ -413,7 +414,7 @@ func testNamedPort(k8s *Kubernetes) *Reachability {
 	namedPorts := "serve-80"
 	builder := &NetworkPolicySpecBuilder{}
 	builder = builder.SetName("x", "allow-client-a-via-named-port-ingress-rule").SetPodSelector(map[string]string{"pod": "a"})
-	builder.SetTypeIngress().AddIngress(nil, &p80, &namedPorts, nil, nil, nil, nil, nil)
+	builder.SetTypeIngress().AddIngress(nil, nil, &namedPorts, nil, nil, nil, nil, nil)
 
 	k8s.CreateOrUpdateNetworkPolicy("x", builder.Get())
 	// No egress rules because we're deny all !

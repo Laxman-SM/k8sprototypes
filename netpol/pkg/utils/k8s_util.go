@@ -246,12 +246,14 @@ func (k *Kubernetes) CleanNetworkPolicies(namespaces []string) {
 		l, err := k.ClientSet.NetworkingV1().NetworkPolicies(ns).List(metav1.ListOptions{})
 		if err != nil {
 			log.Errorf("unable to list network policies in ns %s: %s", ns, err)
+			panic("failed at deleting netpols")
 		}
 		for _, np := range l.Items {
 			log.Infof("deleting network policy %s in ns %s", np.Name, ns)
 			err = k.ClientSet.NetworkingV1().NetworkPolicies(np.Namespace).Delete(np.Name, nil)
 			if err != nil {
 				log.Errorf("unable to delete network policy %s: %s", np.Name, err)
+				panic("deletion failed")
 			}
 		}
 	}
