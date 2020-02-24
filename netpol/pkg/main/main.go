@@ -235,7 +235,7 @@ func TestMultipleUpdates(k8s *Kubernetes) {
 			map[string]string{
 				"pod":     "b",
 				"updated": "true",
-			}, "nginx:1.8-alpine") // old nginx cause it was before people deleted everything useful from containers
+			} ) // old nginx cause it was before people deleted everything useful from containers
 		// copied from above
 		reachability1 := NewReachability(allPods, true)
 		reachability1.ExpectAllIngress(Pod("x/a"), false)
@@ -258,7 +258,7 @@ func TestMultipleUpdates(k8s *Kubernetes) {
 			map[string]string{
 				"pod": "b",
 				// REMOVE UPDATED ANNOTATION, otherwise identical to above function.
-			}, "nginx:1.8-alpine") // old nginx cause it was before people deleted everything useful from containers
+			} ) // old nginx cause it was before people deleted everything useful from containers
 		// copied from above
 		reachability1 := NewReachability(allPods, true)
 		reachability1.ExpectAllIngress(Pod("x/a"), false)
