@@ -48,6 +48,7 @@ func bootstrap(k8s *Kubernetes) {
 				}, "nginx:1.8-alpine") // old nginx cause it was before people deleted everything useful from containers
 		}
 	}
+	k8s.CleanNetworkPolicies([]string{"x","y","z"})
 }
 
 func validate(k8s *Kubernetes, reachability *Reachability, port int) {
@@ -77,30 +78,46 @@ func main() {
 	}
 	k8s.CleanNetworkPolicies(namespaces)
 
-	//testWrapperPort80(k8s, TestDefaultDeny)
-	//testWrapperPort80(k8s, TestPodLabelWhitelistingFromBToA)
+	bootstrap(k8s)
+	testWrapperPort80(k8s, TestDefaultDeny)
 
-	//testWrapperPort80(k8s, testInnerNamespaceTraffic)
-	//testWrapperPort80(k8s, testEnforcePodAndNSSelector)
+	bootstrap(k8s)
+	testWrapperPort80(k8s, TestPodLabelWhitelistingFromBToA)
 
-	//testWrapperPort80(k8s, testEnforcePodOrNSSelector)
+	bootstrap(k8s)
+	testWrapperPort80(k8s, testInnerNamespaceTraffic)
 
-	//testPortsPolicies(k8s)
+	bootstrap(k8s)
+	testWrapperPort80(k8s, testEnforcePodAndNSSelector)
+
+	bootstrap(k8s)
+	testWrapperPort80(k8s, testEnforcePodOrNSSelector)
+
+
+	bootstrap(k8s)
+	testPortsPolicies(k8s)
 
 	// stacked port policies
+	bootstrap(k8s)
 	testWrapperStacked(k8s, testPortsPoliciesStackedOrUpdated, true)
 	// updated port policies
-	//testWrapperStacked(k8s, testPortsPoliciesStackedOrUpdated, false)
+	bootstrap(k8s)
+	testWrapperStacked(k8s, testPortsPoliciesStackedOrUpdated, false)
 
-	//testWrapperPort80(k8s, testAllowAll)
+	bootstrap(k8s)
+	testWrapperPort80(k8s, testAllowAll)
 
-	//testWrapperPort80(k8s, testNamedPort)
+	bootstrap(k8s)
+	testWrapperPort80(k8s, testNamedPort)
 
-	//testWrapperPort80(k8s, testNamedPortWNamespace)
+	bootstrap(k8s)
+	testWrapperPort80(k8s, testNamedPortWNamespace)
 
-	//testWrapperPort80(k8s, testEgressOnNamedPort)
+	bootstrap(k8s)
+	testWrapperPort80(k8s, testEgressOnNamedPort)
 
-	//testWrapperStacked(k8s, TestAllowAllPrecedenceIngress,true )
+	bootstrap(k8s)
+	testWrapperStacked(k8s, TestAllowAllPrecedenceIngress,true )
 
 	/**
 		TestEgressAndIngressIntegration
@@ -418,8 +435,8 @@ func testAllowAll(k8s *Kubernetes) *Reachability {
 }
 
 // This covers two test cases: stacked policy's and updated policies.
-// 1) should enforce policy based on Ports [Feature:NetworkPolicy] (disallow 80) (stacked == false)
-// 2) should enforce updated policy (stacked == true)
+// 1) should enforce policy based on Ports [Feature:NetworkPolicy] (allow 80 -> allow 81 by changing the policy) (stacked == false)
+// 2) should enforce updated policy (stacked == true), in which (allow 81 -> allow 81+80 by stacking a 2nd whitelist for 81)
 func testPortsPoliciesStackedOrUpdated(k8s *Kubernetes, stackInsteadOfUpdate bool) []*Stack {
 	blocked := func() *Reachability {
 		r := NewReachability(allPods, true)
