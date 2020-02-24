@@ -46,7 +46,7 @@ func bootstrap(k8s *Kubernetes) {
 			k8s.CreateOrUpdateDeployment(ns, ns+pod, 1,
 				map[string]string{
 					"pod": pod,
-				}, "nginx:1.8-alpine") // old nginx cause it was before people deleted everything useful from containers
+				})
 		}
 	}
 	k8s.CleanNetworkPolicies([]string{"x","y","z"})
@@ -121,6 +121,7 @@ func main() {
 	testWrapperStacked(k8s, TestAllowAllPrecedenceIngress,true )
 
 	/**
+		// TestCIDR
 		TestEgressAndIngressIntegration
 		TestMultipleUpdates(k8s)
 	**/
